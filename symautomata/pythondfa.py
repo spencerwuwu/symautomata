@@ -36,6 +36,7 @@ class DFAState:
         """
         self.final = False
         self.initial = False
+        self.lookup = False
         self.stateid = sid
         self.arcs = []
 
@@ -131,6 +132,7 @@ class PythonDFA(object):
             self.isyms.__setitem__(char, num)
             self.osyms.__setitem__(char, num)
             num = num + 1
+        self.last_accepting_state = None
 
     def __str__(self):
         """Describes DFA object"""
@@ -705,6 +707,8 @@ class PythonDFA(object):
                         # in the same group. If they are going on a different
                         # group then split
                         deststate = _delta(graph, graph[sid], character)
+                        if deststate is None:
+                            continue
                         destgroup = _get_group_from_state(groups,
                             deststate.stateid)
                         target[destgroup].append(sid)

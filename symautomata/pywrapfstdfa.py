@@ -11,7 +11,9 @@ http://www.openfst.org/twiki/bin/view/FST/PythonExtension
 from operator import attrgetter
 from alphabet import createalphabet
 EPSILON = 0xffff
-import pywrapfst as fst
+#import pywrapfst as fst
+#import openfst_python as fst
+import pyfst as fst
 
 def TropicalWeight(param):
     """

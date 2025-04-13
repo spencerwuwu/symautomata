@@ -7,6 +7,8 @@ import random
 import re
 import string
 import tempfile
+import networkx as nx
+from operator import attrgetter
 from subprocess import call
 from sys import argv
 
@@ -104,6 +106,52 @@ class Flexparser:
         return states
 
     def _read_accept_states(self):
+        """
+        Read DFA accepted states from flex compiled file
+        Args:
+            None
+        Returns:
+            list: The list of accepted states
+        """
+        states = []
+        i = 0
+        regex = re.compile('[ \t\n\r:,]+')
+        found = 0  # For maintaining the state of yy_accept declaration
+        state = 0  # For maintaining the state of opening and closing tag of yy_accept
+        mapping = [] # For writing each set of yy_accept
+        cur_line = None
+        with open(self.outfile) as flex_file:
+            for cur_line in flex_file:
+                if cur_line[0:37] == "static yyconst flex_int16_t yy_accept" or cur_line[0:35] == "static const flex_int16_t yy_accept":
+                    found = 1
+                    continue
+                if found == 1:
+                    # print x
+                    if state == 0 and cur_line[0:5] == "    {":
+                        mapping.append(0)  # there is always a zero there
+                        state = 1
+                        continue
+
+                    if state == 1:
+                        if cur_line[0:7] != "    } ;":
+                            cur_line = "".join(cur_line.split())
+                            if cur_line == '':
+                                continue
+                            if cur_line[cur_line.__len__() - 1] == ',':
+                                splitted_line = regex.split(
+                                    cur_line[:cur_line.__len__() - 1])
+                            else:
+                                splitted_line = regex.split(cur_line)
+                            mapping = mapping + splitted_line
+                            continue
+                        else:
+                            cleared = []
+                            for j in mapping:
+                                cleared.append(int(j))
+                            return cleared
+        return []
+
+    def _x_read_accept_states(self):
         """
         Read DFA accepted states from flex compiled file
         Args:
@@ -253,10 +301,11 @@ class Flexparser:
             """
             if character != '':
                 newstate = states[current_state][ord(character)]
-                if newstate > 0:
-                    return newstate
-                else:
-                    return total_states
+                return newstate
+                #if newstate > 0:
+                #    return newstate
+                #else:
+                #    return total_states
             else:
                 return nulltrans[current_state]
 
@@ -276,7 +325,9 @@ class Flexparser:
         self._create_automaton_from_regex(lexfile)
         states_num, delta = self._create_delta()
         states = self._create_states(states_num)
+        print(states)
         accepted_states = self._read_accept_states()
+        print(accepted_states)
         if self.alphabet != []:
             alphabet = self.alphabet
         else:
@@ -284,14 +335,63 @@ class Flexparser:
         mma = DFA(alphabet)
         for state in states:
             if state != 0:
+                print ""
+                #print state in accepted_states
                 for char in alphabet:
+                    # TODO: yy_last_accepting_state impl
+                    # Normally, if ( yy_accept[yy_current_state] ), (yy_last_accepting_state) = yy_current_state.
+                    # When yy_act == 0, will return yy_accept[yy_last_accepting_state],
+                    # But since we're looping here, don't know how to do
                     nextstate = delta(state, char)
-                    mma.add_arc(state - 1, nextstate - 1, char)
-                if state in accepted_states:
-                    mma[state - 1].final = True
+                    if nextstate > 0:
+                        mma.add_arc(state, nextstate, char)
+                        print("add", state, nextstate, char)
+                    else:
+                        nextstate = - nextstate
+                        yy_act = accepted_states[nextstate]
+                        if yy_act == 1:
+                            print("is fin", state, char)
+                            mma.states[state].final = True
+                        elif yy_act == 0:
+                            print("Lookback:", state, char, yy_act)
+                            mma.add_arc(state, 0, char)
+                        elif yy_act == 2:
+                            print("Dead:", state, nextstate, char, yy_act)
+                        else:
+                            print("TODO:", state, nextstate, char, yy_act)
+                #if state in accepted_states:
+                #    mma[state - 1].final = True
         if os.path.exists(self.outfile):
             os.remove(self.outfile)
+        mma.states[1].initial = True
         return mma
+
+
+def mma_2_digraph(mma):
+    G = nx.DiGraph()
+    states = sorted(mma.states, key=attrgetter('initial'), reverse=True)
+    #states = sorted(mma.states, reverse=True)
+
+    for state in states:
+        if state.stateid not in G:
+            print(state.final)
+            if state.final:
+                G.add_node(state.stateid, shape="doublecircle")
+            else:
+                G.add_node(state.stateid)
+        for arc in state.arcs:
+            if arc.nextstate not in G:
+                G.add_node(arc.nextstate)
+            itext = mma.isyms.find(arc.ilabel)
+            #print(itext)
+            label = itext
+            #print(label)
+            if G.has_edge(state.stateid, arc.nextstate):
+                cur_l = G.get_edge_data(state.stateid, arc.nextstate)["label"]
+                if label not in cur_l:
+                    label += cur_l
+            G.add_edge(state.stateid, arc.nextstate, label=label)
+    return G
 
 
 def main():
@@ -301,12 +401,17 @@ def main():
     if len(argv) < 2:
         print 'Usage: %s fst_file [optional: save_file]' % argv[0]
         return
-    flex_a = Flexparser()
+    flex_a = Flexparser(["a","b","c","d", "/"])
     mma = flex_a.yyparse(argv[1])
-    mma.minimize()
+    #mma.minimize()
     print mma
     if len(argv) == 3:
-        mma.save(argv[2])
+        mma.save(argv[2]+".txt")
+
+        graph = mma_2_digraph(mma)
+        p = nx.nx_pydot.to_pydot(graph)
+        #p.write_dot(args.output)
+        p.write_png(argv[2] + '.png')
 
 
 if __name__ == '__main__':

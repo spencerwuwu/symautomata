@@ -31,11 +31,11 @@ try:
             mmc = ops.diff()
             return mmc
 
-        def  consume_input(self, str):
-            """
-            Not implemented
-            """
-            return 0xffff
+        #def  consume_input(self, str):
+        #    """
+        #    Not implemented
+        #    """
+        #    return 0xffff
 
 except ImportError:
     print 'FAIL'

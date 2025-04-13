@@ -45,8 +45,11 @@ def bfs(graph, start):
 try:
     print 'Checking for pywrapfst module:',
     imp.find_module('pywrapfst')
+    #print 'Checking for openfst_python module:',
+    #imp.find_module('openfst_python')
     print 'OK'
     from pywrapfstdfa import PywrapfstDFA, TropicalWeight
+    #import openfst_python as fst
     import pywrapfst as fst
 
 

@@ -20,6 +20,7 @@ class CfgPDA():
         Extract an alphabet from the given grammar.
         """
         alphabet = set([])
+        # TODO: no terminal in CNFGenerator
         for terminal in grammar.Terminals:
             alphabet |= set([x for x in terminal])
         self.alphabet = list(alphabet)

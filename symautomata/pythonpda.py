@@ -13,7 +13,7 @@ class PDAState(object):
 
     def printer(self):
         """Prints PDA state attributes"""
-        print " ID " + repr(self.id)
+        print " ID " + repr(self.id) + " TYPE: " + repr(self.type)
         if self.type == 0:
             print " Tag: - "
             print " Start State - "
@@ -117,7 +117,8 @@ class PythonPDA(object):
         if self.s[state].type == 1:
             stack.append(self.s[state].sym)
             if len(self.s[state].trans) > 0:
-                state = self.s[state].trans[0]
+                print(state, self.s[state].trans)
+                state = self.s[state].trans.keys()[0]
                 if self.parse(
                         mystr,
                         stack=stack,

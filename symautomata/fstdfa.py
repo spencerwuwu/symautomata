@@ -5,10 +5,13 @@ It is an interface for pyfst.
 # /usr/bin/python
 
 from operator import attrgetter
-import fst
+#import fst
+import pywrapfst as fst
+#import openfst_python as fst
 from alphabet import createalphabet
 
-EPSILON = fst.EPSILON
+#EPSILON = fst.EPSILON
+EPSILON = 0xffff
 
 def TropicalWeight(param):
     """
