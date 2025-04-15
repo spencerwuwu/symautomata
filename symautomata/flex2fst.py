@@ -325,17 +325,18 @@ class Flexparser:
         self._create_automaton_from_regex(lexfile)
         states_num, delta = self._create_delta()
         states = self._create_states(states_num)
-        print(states)
+        #print(states)
         accepted_states = self._read_accept_states()
-        print(accepted_states)
+        #print(accepted_states)
         if self.alphabet != []:
             alphabet = self.alphabet
         else:
             alphabet = createalphabet()
         mma = DFA(alphabet)
+        mma.yy_accept = accepted_states
         for state in states:
             if state != 0:
-                print ""
+                #print ""
                 #print state in accepted_states
                 for char in alphabet:
                     # TODO: yy_last_accepting_state impl
@@ -345,20 +346,22 @@ class Flexparser:
                     nextstate = delta(state, char)
                     if nextstate > 0:
                         mma.add_arc(state, nextstate, char)
-                        print("add", state, nextstate, char)
+                        #print("add", state, nextstate, char)
                     else:
                         nextstate = - nextstate
                         yy_act = accepted_states[nextstate]
                         if yy_act == 1:
-                            print("is fin", state, char)
+                            #print("is fin", state, char)
                             mma.states[state].final = True
                         elif yy_act == 0:
-                            print("Lookback:", state, char, yy_act)
+                            #print("Lookback:", state, char, yy_act)
                             mma.add_arc(state, 0, char)
                         elif yy_act == 2:
-                            print("Dead:", state, nextstate, char, yy_act)
+                            #print("Dead:", state, nextstate, char, yy_act)
+                            pass
                         else:
-                            print("TODO:", state, nextstate, char, yy_act)
+                            #print("TODO:", state, nextstate, char, yy_act)
+                            pass
                 #if state in accepted_states:
                 #    mma[state - 1].final = True
         if os.path.exists(self.outfile):
@@ -373,12 +376,15 @@ def mma_2_digraph(mma):
     #states = sorted(mma.states, reverse=True)
 
     for state in states:
+        # Separate node creation so that can mark node correctly
         if state.stateid not in G:
-            print(state.final)
             if state.final:
                 G.add_node(state.stateid, shape="doublecircle")
+            elif state.initial:
+                G.add_node(state.stateid, shape="box")
             else:
                 G.add_node(state.stateid)
+    for state in states:
         for arc in state.arcs:
             if arc.nextstate not in G:
                 G.add_node(arc.nextstate)
@@ -413,6 +419,11 @@ def main():
         #p.write_dot(args.output)
         p.write_png(argv[2] + '.png')
 
+    print "F", mma.consume_input("aba")
+    print "T", mma.consume_input("/aba/")
+    print "F", mma.consume_input("cccc/")
+    print "T", mma.consume_input("/cccc/d")
+    print "F", mma.consume_input("/ccdc/d")
 
 if __name__ == '__main__':
     main()

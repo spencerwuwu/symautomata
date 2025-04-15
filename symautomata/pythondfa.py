@@ -132,8 +132,9 @@ class PythonDFA(object):
             self.isyms.__setitem__(char, num)
             self.osyms.__setitem__(char, num)
             num = num + 1
-        self.last_accepting_state = None
-
+        self.yy_last_accepting_state = None
+        self.yy_accept = []
+ 
     def __str__(self):
         """Describes DFA object"""
         return "This is a python DFA object with " + `len(self.states)` + " states"
@@ -265,6 +266,8 @@ class PythonDFA(object):
             reverse=True)[0]
         while len(inp) > 0:
             found = False
+            if self.yy_accept[cur_state.stateid] > 0:
+                self.yy_last_accepting_state = cur_state
             for arc in cur_state.arcs:
                 if self.isyms.find(arc.ilabel) == inp[0]:
                     cur_state = self[arc.nextstate]
@@ -273,6 +276,8 @@ class PythonDFA(object):
                     break
             if not found:
                 return False
+        if cur_state.stateid and self.yy_last_accepting_state is not None == 0:
+            return self.yy_accept[self.yy_last_accepting_state.stateid] == 1
         return cur_state.final
 
     def empty(self):
