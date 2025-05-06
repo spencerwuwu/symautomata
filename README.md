@@ -1,4 +1,19 @@
 # symautomata
+
+## Demo
+```
+pip install -r requirements-dev.txt
+```
+
+```bash
+python2 mini2fst.py mini.l
+```
+
+```bash
+python2 url2fst.py url.l
+```
+
+
 Automata classes
 
 A python framework for working with Automata. The framework contains a python implementation and C bindings using pywrapfst (optional).
