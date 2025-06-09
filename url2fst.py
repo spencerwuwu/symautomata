@@ -34,9 +34,12 @@ def main():
     print("---")
     print("F", mma.consume_input("aba"))
     print("T", mma.consume_input("http://abcde.com/"))
-    print("F", mma.consume_input("aaaa://abcde.com/"))
+    print("T", mma.consume_input("aaaa://abcde.com/"))
+    print("F", mma.consume_input("9a://abcde.com/"))
     print("T", mma.consume_input("http://abcde.com:88/"))
     print("T", mma.consume_input("http://abcde.com:88/acf%123"))
+    print("T", mma.consume_input("http://abcde.com/abc#ddd"))
+    print("F", mma.consume_input("http://abcde.com/abc##ddd"))
 
 if __name__ == '__main__':
     main()
