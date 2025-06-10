@@ -400,6 +400,30 @@ def mma_2_digraph(mma):
     return G
 
 
+def simplify_digraph_labels(G):
+    def do_replace(label, target, sub):
+        if target in label:
+            label = label.replace(target, sub)
+        if target[::-1] in label:
+            label = label.replace(target[::-1], sub)
+        return label
+
+    for n, nbrsdict in G.adjacency():
+        for nbr, eattr in nbrsdict.items():
+            label = eattr['label']
+
+            label = do_replace(label, string.ascii_uppercase, "{A-Z}")
+            label = do_replace(label, string.ascii_lowercase, "{a-z}")
+            label = do_replace(label, string.digits, "{0-9}")
+            label = do_replace(label, "abcdef", "{a-f}")
+            label = do_replace(label, "abcdef".upper(), "{a-f}".upper())
+            label = do_replace(label, string.ascii_lowercase.replace("abcdef",""), "{!a-f}")
+            label = do_replace(label, string.ascii_uppercase.replace("ABCDEF",""), "{!A-F}")
+
+            eattr['label'] = label
+            print(label)
+    return G
+
 def main():
     """
     Testing function for Flex Regular Expressions to FST DFA
