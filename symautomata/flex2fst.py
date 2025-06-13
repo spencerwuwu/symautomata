@@ -400,39 +400,30 @@ def mma_2_digraph(mma):
     return G
 
 
-def mma_trace_2_digraph(mma, trace):
-    G = nx.DiGraph()
-    states = sorted(mma.states, key=attrgetter('initial'), reverse=True)
-    #states = sorted(mma.states, reverse=True)
+def mma_trace_2_digraph(mma, traces, colors):
+    # Construct the base digraph
+    G = mma_2_digraph(mma)
 
-    for state in states:
-        # Separate node creation so that can mark node correctly
-        if state.stateid not in G:
-            if state.final:
-                G.add_node(state.stateid, shape="doublecircle")
-            elif state.initial:
-                G.add_node(state.stateid, shape="box")
-            else:
-                G.add_node(state.stateid)
-    for state in states:
-        for arc in state.arcs:
-            if arc.nextstate not in G:
-                G.add_node(arc.nextstate)
-            itext = mma.isyms.find(arc.ilabel)
-            label = itext
-            if G.has_edge(state.stateid, arc.nextstate):
-                cur_l = G.get_edge_data(state.stateid, arc.nextstate)["label"]
-                if label not in cur_l:
-                    label += cur_l
-            G.add_edge(state.stateid, arc.nextstate, label=label)
+    # Start coloring with traces
+    cur_union = traces[-1]
+    for trace_id in range(len(traces)-1, -1, -1):
+        trace = traces[trace_id]
+        color = colors[trace_id]
+        new_union = []
+        for t in trace:
+            if t in cur_union:
+                new_union.append(t)
+        for t in new_union:
+            G.nodes[t[0]]["color"] = color
+            G.nodes[t[0]]["style"] = "filled"
 
-    for t in trace:
-        G.nodes[t[0]]["color"] = "red"
+        for edge in G.edges():
+            for t,s in new_union:
+                if t == edge[0] and s in G.edges[edge]['label']:
+                    G.edges[edge]["color"] = color
+
+        cur_union = new_union
     
-    for edge in G.edges():
-        for t,s in trace:
-            if t == edge[0] and s in G.edges[edge]['label']:
-                G.edges[edge]["color"] = "red"
     return G
 
 
@@ -443,10 +434,16 @@ def simplify_digraph(G, mma):
             init_states.append(state.stateid)
 
     # Drop nodes that are not starting states and no incoming edges
+    self_loops = set()
+    for edge in G.edges():
+        if edge[0] == edge[1]:
+            self_loops.add(edge[0])
+
     if init_states:
         useless_states = []
         for node_id, in_degree in G.in_degree():
-            if in_degree == 0 and node_id not in init_states:
+            if (in_degree == 0 or (in_degree == 1 and node_id in self_loops)) \
+                    and node_id not in init_states:
                 useless_states.append(node_id)
         G.remove_nodes_from(useless_states)
 
@@ -472,6 +469,7 @@ def simplify_digraph(G, mma):
 
             eattr['label'] = label
     return G
+
 
 def main():
     """

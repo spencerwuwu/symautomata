@@ -47,12 +47,35 @@ def main():
     print("T", mma.consume_input("http://abcde.com:88/"))
     print("T", mma.consume_input("http://abcde.com:88/acf%123"))
     print("T", mma.consume_input("http://abcde.com/abc#ddd"))
+    print("T", mma.consume_input("http://user:passwd@abcde.com/abc#ddd"))
+    print("T", mma.consume_input("http://user@abcde.com/abc#ddd"))
     print("F", mma.consume_input("http://abcde.com/abc##ddd"))
 
-    trace = mma.trace_partial_input("http://")
-    print(trace)
+    url_prefixes = ["http", "://", "user", ":", "passwd", "@", "domain.com", ":", "88", "/", "path", "#", "frag"]
+    traces = []
+    for i in range(len(url_prefixes)-1):
+        trace = mma.trace_partial_input("".join(url_prefixes[:i+1]))
+        traces.append(trace)
+        #print(trace)
 
-    graph = mma_trace_2_digraph(mma, trace)
+    colors = [
+            "aqua",
+            "blue",
+            "bisque",
+            "brown",
+            "chartreuse",
+            "crimson",
+            "darkorchid",
+            "deeppink",
+            "tomato",
+            "lime",
+            "orange",
+            "cyan",
+            "fuchsia",
+            "gold"
+            ]
+
+    graph = mma_trace_2_digraph(mma, traces, colors)
     graph = simplify_digraph(graph, mma)
     p = nx.nx_pydot.to_pydot(graph)
     p.write_png(model_name + ".png")
