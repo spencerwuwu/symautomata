@@ -280,6 +280,34 @@ class PythonDFA(object):
             return self.yy_accept[self.yy_last_accepting_state.stateid] == 1
         return cur_state.final
 
+
+    def trace_partial_input(self, inp):
+        """
+        Return a list of (state, char) traversed by the inp
+        """
+        traversed = []
+
+        cur_state = sorted(
+            self.states,
+            key=attrgetter('initial'),
+            reverse=True)[0]
+
+        while len(inp) > 0:
+            found = False
+            traversed.append((cur_state.stateid, inp[0]))
+            if self.yy_accept[cur_state.stateid] > 0:
+                self.yy_last_accepting_state = cur_state
+            for arc in cur_state.arcs:
+                if self.isyms.find(arc.ilabel) == inp[0]:
+                    cur_state = self[arc.nextstate]
+                    inp = inp[1:]
+                    found = True
+                    break
+            if not found:
+                return False
+        return traversed
+
+
     def empty(self):
         """
         Return True if the DFA accepts the empty language.

@@ -3,7 +3,8 @@ from sys import argv
 import networkx as nx
 import string
 
-from symautomata.flex2fst import Flexparser, mma_2_digraph, simplify_digraph_labels
+from symautomata.flex2fst import Flexparser, mma_2_digraph, simplify_digraph
+from symautomata.flex2fst import mma_trace_2_digraph
 from symautomata.dfa import DFA
 
 # https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -32,12 +33,11 @@ def main():
     mma.save(model_name + ".txt")
 
 
-    graph = mma_2_digraph(mma)
-    # Clean up the graph
-    graph = simplify_digraph_labels(graph)
+    #graph = mma_2_digraph(mma)
+    #graph = simplify_digraph(graph)
 
-    p = nx.nx_pydot.to_pydot(graph)
-    p.write_png(model_name + ".png")
+    #p = nx.nx_pydot.to_pydot(graph)
+    #p.write_png(model_name + ".png")
 
     print("---")
     print("F", mma.consume_input("aba"))
@@ -48,6 +48,15 @@ def main():
     print("T", mma.consume_input("http://abcde.com:88/acf%123"))
     print("T", mma.consume_input("http://abcde.com/abc#ddd"))
     print("F", mma.consume_input("http://abcde.com/abc##ddd"))
+
+    trace = mma.trace_partial_input("http://")
+    print(trace)
+
+    graph = mma_trace_2_digraph(mma, trace)
+    graph = simplify_digraph(graph, mma)
+    p = nx.nx_pydot.to_pydot(graph)
+    p.write_png(model_name + ".png")
+
 
 if __name__ == '__main__':
     main()
