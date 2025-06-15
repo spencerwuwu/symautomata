@@ -115,15 +115,16 @@ class syms:
 class PythonDFA(object):
     """A DFA implementation that uses the
     same interface with python symautomata"""
-    def __init__(self, alphabet=createalphabet()):
+    def __init__(self, alphabet=createalphabet(), skip_alphabets=[]):
         """
         Args:
             alphabet (list): The imput alphabet
         Returns:
             None
         """
-        self.states = []
+        self.states = {}
         self.alphabet = alphabet
+        self.skip_alphabets = []
         self.nfa = False
         num = 1
         self.isyms = syms()
@@ -170,10 +171,10 @@ class PythonDFA(object):
     def add_state(self):
         """Adds a new state"""
         sid = len(self.states)
-        self.states.append(DFAState(sid))
+        self.states[sid] = DFAState(sid)
         return sid
 
-    def add_arc(self, src, dst, char):
+    def add_arc(self, src, dst, char, no_arc=False):
         """Adds a new Arc
         Args:
             src (int): The source state identifier
@@ -191,7 +192,9 @@ class PythonDFA(object):
         for s_idx in [src, dst]:
             if s_idx >= len(self.states):
                 for i in range(len(self.states), s_idx + 1):
-                    self.states.append(DFAState(i))
+                    self.states[i] = DFAState(i)
+        if no_arc:
+            return
         for arc in self.states[src].arcs:
             if arc.ilabel == self.isyms.__getitem__(char) or char == EPSILON:
                 self.nfa = True
@@ -236,7 +239,7 @@ class PythonDFA(object):
             None
         """
         endstate = len(list(self.states))
-        for state in self.states:
+        for state in self.states.values():
             for char in alphabet:
                 found = 0
                 for arc in state.arcs:
@@ -260,11 +263,20 @@ class PythonDFA(object):
             bool: A true or false value depending on if the DFA
                 accepts the provided input
         """
-        cur_state = sorted(
-            self.states,
-            key=attrgetter('initial'),
-            reverse=True)[0]
+        def _get_cur():
+            for state in self.states.values():
+                if state.initial:
+                    return state
+        #cur_state = sorted(
+        #    self.states,
+        #    key=attrgetter('initial'),
+        #    reverse=True)[0]
+        cur_state = _get_cur()
         while len(inp) > 0:
+            #print(cur_state.stateid, inp[0])
+            if inp[0] in self.skip_alphabets:
+                inp = inp[1:]
+                continue
             found = False
             if self.yy_accept[cur_state.stateid] > 0:
                 self.yy_last_accepting_state = cur_state
@@ -287,10 +299,15 @@ class PythonDFA(object):
         """
         traversed = []
 
-        cur_state = sorted(
-            self.states,
-            key=attrgetter('initial'),
-            reverse=True)[0]
+        def _get_cur():
+            for state in self.states.values():
+                if state.initial:
+                    return state
+        #cur_state = sorted(
+        #    self.states,
+        #    key=attrgetter('initial'),
+        #    reverse=True)[0]
+        cur_state = _get_cur()
 
         while len(inp) > 0:
             found = False
@@ -323,8 +340,9 @@ class PythonDFA(object):
         Returns:
             None
         """
-        states = sorted(self.states, key=attrgetter('initial'), reverse=True)
-        for state in states:
+        # Original code that treat states as list
+        #states = sorted(self.states, key=attrgetter('initial'), reverse=True)
+        for state in states.values():
             if state.final:
                 state.final = False
             else:
@@ -353,8 +371,11 @@ class PythonDFA(object):
             None
         """
         output_filename = open(txt_fst_file_name, 'w+')
-        states = sorted(self.states, key=attrgetter('initial'), reverse=True)
-        for state in states:
+        #state_ids = sorted(self.states, key=attrgetter('initial'), reverse=True)
+        state_ids = sorted(self.states, reverse=True)
+        #for state in states:
+        for state_id in state_ids:
+            state = self.states[state_id]
             for arc in state.arcs:
                 itext = self.isyms.find(arc.ilabel)
                 otext = self.osyms.find(arc.ilabel)

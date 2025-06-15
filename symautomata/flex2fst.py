@@ -13,7 +13,69 @@ from subprocess import call
 from sys import argv
 
 from alphabet import createalphabet
-from dfa import DFA
+
+#from dfa import DFA
+from pythondfa import PythonDFA
+
+class DFA(PythonDFA):
+    """The DFA class implemented using python"""
+
+    def __init__(self, alphabet = createalphabet()):
+        self.alphabet = alphabet
+        super(DFA, self).__init__(alphabet)
+
+    def copy(self):
+        mma = DFA(self.alphabet)
+        mma.states = copy.deepcopy(self.states)
+        mma.alphabet = copy.deepcopy(self.alphabet)
+        mma.isyms = copy.deepcopy(self.isyms)
+        mma.osyms = copy.deepcopy(self.osyms)
+        return mma
+
+    def shortest_string(self):
+        """
+        Uses BFS in order to find the shortest string
+        Args:
+            None
+        Returns:
+            str: The shortest string
+        """
+        initialstates = sorted(
+            self.states,
+            key=attrgetter('initial'),
+            reverse=True)
+        if len(initialstates) > 0:
+            return bfs(self, initialstates[0])
+        else:
+            return None
+
+    def diff(self, input_mm):
+        """
+        Automata Diff operation
+        """
+        mma = DFA(self.alphabet)
+        mma.init_from_acceptor(self)
+        mmb = DFA(self.alphabet)
+        mmb.init_from_acceptor(input_mm)
+        mma.minimize()
+        mmb.complement(self.alphabet)
+        mmb.minimize()
+        mmc = DFA(self.alphabet)
+        mmc.init_from_acceptor(mma & mmb)
+        return mmc
+
+    def to_regex(self):
+        """
+        Returns a regex approximation
+        Args:
+            None
+        Returns:
+            str: A regex approximation
+        """
+        from regex import Regex
+        converter = Regex(self)
+        return converter.get_regex()
+
 
 
 class Flexparser:
@@ -346,12 +408,17 @@ class Flexparser:
                     nextstate = delta(state, char)
                     if nextstate > 0:
                         mma.add_arc(state, nextstate, char)
-                        #print("add", state, nextstate, char)
                     else:
+                        #print("else", state, nextstate, char)
                         nextstate = - nextstate
+                        if nextstate >= len(accepted_states):
+                            print("Here", nextstate, accepted_states)
+                            continue
                         yy_act = accepted_states[nextstate]
                         if yy_act == 1:
-                            #print("is fin", state, char)
+                            if state not in mma.states:
+                                mma.add_arc(state, state, char, no_arc=True)
+                                continue
                             mma.states[state].final = True
                         elif yy_act == 0:
                             #print("Lookback:", state, char, yy_act)
@@ -372,10 +439,11 @@ class Flexparser:
 
 def mma_2_digraph(mma):
     G = nx.DiGraph()
-    states = sorted(mma.states, key=attrgetter('initial'), reverse=True)
-    #states = sorted(mma.states, reverse=True)
+    #states = sorted(mma.states, key=attrgetter('initial'), reverse=True)
+    state_ids = sorted(mma.states, reverse=True)
 
-    for state in states:
+    for state_id in state_ids:
+        state = mma.states[state_id]
         # Separate node creation so that can mark node correctly
         if state.stateid not in G:
             if state.final:
@@ -384,7 +452,8 @@ def mma_2_digraph(mma):
                 G.add_node(state.stateid, shape="box")
             else:
                 G.add_node(state.stateid)
-    for state in states:
+    for state_id in state_ids:
+        state = mma.states[state_id]
         for arc in state.arcs:
             if arc.nextstate not in G:
                 G.add_node(arc.nextstate)
@@ -429,7 +498,7 @@ def mma_trace_2_digraph(mma, traces, colors):
 
 def simplify_digraph(G, mma):
     init_states = []
-    for state in mma.states:
+    for state in mma.states.values():
         if state.initial:
             init_states.append(state.stateid)
 

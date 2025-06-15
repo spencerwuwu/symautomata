@@ -5,7 +5,6 @@ import string
 
 from symautomata.flex2fst import Flexparser, mma_2_digraph, simplify_digraph
 from symautomata.flex2fst import mma_trace_2_digraph
-from symautomata.dfa import DFA
 
 # https://en.wikipedia.org/wiki/List_of_Unicode_characters
 def get_common_unicode():
