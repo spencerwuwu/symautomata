@@ -24,9 +24,9 @@ def createalphabet(alphabetinput=None):
             a = int(alphaset.split('-')[0])
             b = int(alphaset.split('-')[1])
             for i in range(a, b):
-                alpha.append(str(unichr(i)))
+                alpha.append(str(chr(i)))
         return alpha
     alpha = []
     for i in range(32, 127):
-        alpha.append(str(unichr(i)))
+        alpha.append(str(chr(i)))
     return alpha

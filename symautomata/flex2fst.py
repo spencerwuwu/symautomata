@@ -12,10 +12,10 @@ from operator import attrgetter
 from subprocess import call
 from sys import argv
 
-from alphabet import createalphabet
+from .alphabet import createalphabet
 
 #from dfa import DFA
-from pythondfa import PythonDFA
+from .pythondfa import PythonDFA
 
 class DFA(PythonDFA):
     """The DFA class implemented using python"""
@@ -131,7 +131,7 @@ class Flexparser:
             for cur_line in flex_file:
                 if cur_line[0:35] == "static yyconst flex_int16_t yy_nxt[" or cur_line[0:33] == "static const flex_int16_t yy_nxt[":
                     found = 1
-                    # print 'Found yy_next declaration'
+                    # print('Found yy_next declaration')
                     continue
                 if found == 1:
                     if state == 0 and cur_line[0:5] == "    {":
@@ -188,7 +188,7 @@ class Flexparser:
                     found = 1
                     continue
                 if found == 1:
-                    # print x
+                    # print(x)
                     if state == 0 and cur_line[0:5] == "    {":
                         mapping.append(0)  # there is always a zero there
                         state = 1
@@ -284,7 +284,7 @@ class Flexparser:
                             ] == "static yyconst yy_state_type yy_NUL_trans" or cur_line[0:len("static const yy_state_type yy_NUL_trans")
                             ] == "static const yy_state_type yy_NUL_trans":
                     found = 1
-                    # print 'Found yy_next declaration'
+                    # print('Found yy_next declaration')
                     continue
                 if found == 1:
                     if state == 0 and cur_line[0:5] == "    {":
@@ -301,7 +301,7 @@ class Flexparser:
                                     cur_line[:cur_line.__len__() - 1])
                             else:
                                 splitted_line = regex.split(cur_line)
-                                #  print y
+                                #  print(y)
                             mapping = mapping + splitted_line
                             continue
                         else:
@@ -398,8 +398,8 @@ class Flexparser:
         mma.yy_accept = accepted_states
         for state in states:
             if state != 0:
-                #print ""
-                #print state in accepted_states
+                #print("")
+                #print(state in accepted_states)
                 for char in alphabet:
                     # TODO: yy_last_accepting_state impl
                     # Normally, if ( yy_accept[yy_current_state] ), (yy_last_accepting_state) = yy_current_state.
@@ -540,30 +540,3 @@ def simplify_digraph(G, mma):
     return G
 
 
-def main():
-    """
-    Testing function for Flex Regular Expressions to FST DFA
-    """
-    if len(argv) < 2:
-        print 'Usage: %s fst_file [optional: save_file]' % argv[0]
-        return
-    flex_a = Flexparser(["a","b","c","d", "/"])
-    mma = flex_a.yyparse(argv[1])
-    #mma.minimize()
-    print mma
-    if len(argv) == 3:
-        mma.save(argv[2]+".txt")
-
-        graph = mma_2_digraph(mma)
-        p = nx.nx_pydot.to_pydot(graph)
-        #p.write_dot(args.output)
-        p.write_png(argv[2] + '.png')
-
-    print "F", mma.consume_input("aba")
-    print "T", mma.consume_input("/aba/")
-    print "F", mma.consume_input("cccc/")
-    print "T", mma.consume_input("/cccc/d")
-    print "F", mma.consume_input("/ccdc/d")
-
-if __name__ == '__main__':
-    main()

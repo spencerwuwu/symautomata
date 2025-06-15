@@ -5,7 +5,7 @@ This module performs all basic DFA operations, without pyfst
 from operator import attrgetter
 from itertools import product
 import copy
-from alphabet import createalphabet
+from .alphabet import createalphabet
 from collections import defaultdict
 EPSILON = 0xffff
 
@@ -138,7 +138,7 @@ class PythonDFA(object):
  
     def __str__(self):
         """Describes DFA object"""
-        return "This is a python DFA object with " + `len(self.states)` + " states"
+        return f"This is a python DFA object with {len(self.states)} states"
 
     def __getitem__(self, state):
         """
@@ -187,8 +187,8 @@ class PythonDFA(object):
         #     "State type should be integer."
         # assert char in self.I
         #
-        #print self.states
-        #print src
+        #print(self.states)
+        #print(src)
         for s_idx in [src, dst]:
             if s_idx >= len(self.states):
                 for i in range(len(self.states), s_idx + 1):
@@ -383,8 +383,8 @@ class PythonDFA(object):
                     '{}\t{}\t{}\t{}\n'.format(
                         state.stateid,
                         arc.nextstate,
-                        itext.encode('hex'),
-                        otext.encode('hex')))
+                        ord(itext),
+                        ord(otext)))
             if state.final:
                 output_filename.write('{}\n'.format(state.stateid))
         output_filename.close()
@@ -752,7 +752,7 @@ class PythonDFA(object):
             for selectgroup in groups:
                 # _check for each letter if it splits the current group
                 for character in self.alphabet:
-                    # print 'Testing symbol: ', c
+                    # print('Testing symbol: ', c)
                     target = defaultdict(list)
                     target_states = defaultdict(int)
                     new_g = [set(selectgroup)]
