@@ -41,18 +41,18 @@ class IntersectionHandling():
         newstate.trans = transitions
         i = 0
         newstatediag[i] = newstate
-        # print 'accepted:'
-        # print dfaaccepted
+        # print('accepted:')
+        # print(dfaaccepted)
         for stateid in statediag:
             state = statediag[stateid]
-            # print state.id
+            # print(state.id)
             if state.type == 2:
                 for state2id in dfaaccepted:
-                    # print state.id[1]
+                    # print(state.id[1])
                     if state.id[1] == state2id:
-                        # print 'adding...'
+                        # print('adding...')
                         state.trans['AI,I'] = ['@wrapping']
-                        # print state.trans
+                        # print(state.trans)
                         break
             i = i + 1
             newstatediag[i] = state
@@ -111,7 +111,7 @@ class ReducePDA():
             list: A reduced list of states using BFS
         """
         if len(statediag) < 1:
-            print 'PDA is empty and can not be reduced'
+            print('PDA is empty and can not be reduced')
             return statediag
         newstatediag = self.bfs(statediag, statediag[0])
         return newstatediag
@@ -367,8 +367,8 @@ class PdaCnf():
                                         # A'+`j`+','+`state_b.id`
                                         found = 1
                 if found == 0:
-                    print "ERROR: symbol " + repr(state_a.sym) \
-                          + ". It was not found anywhere in the graph."
+                    print("ERROR: symbol " + repr(state_a.sym) \
+                          + ". It was not found anywhere in the graph.")
 
     def get_rules(self, optimized):
         """
@@ -414,13 +414,13 @@ def main():
     :param argv: Parameters
     """
     if len(argv) < 3:
-        print 'Usage for getting CFG: %s CFG_fileA CFG ' % argv[0]
-        print 'Usage for getting STR: %s CFG_fileA STR ' \
-              'Optimize[0 or 1] splitstring[0 or 1] ' % argv[0]
-        print ''
-        print 'For example: python pdacnf.py grammar.y STR 1 0'
-        print '             python pdacnf.py grammar.y STR 1 1'
-        print '             python pdacnf.py grammar.y CFG'
+        print('Usage for getting CFG: %s CFG_fileA CFG ' % argv[0])
+        print('Usage for getting STR: %s CFG_fileA STR ' \
+              'Optimize[0 or 1] splitstring[0 or 1] ' % argv[0])
+        print('')
+        print('For example: python pdacnf.py grammar.y STR 1 0')
+        print('             python pdacnf.py grammar.y STR 1 1')
+        print('             python pdacnf.py grammar.y CFG')
         return
 
     alphabet = createalphabet()
@@ -434,46 +434,46 @@ def main():
         splitstring = int(argv[4])
 
     cfgtopda = CfgPDA(alphabet)
-    print '* Parsing Grammar:',
+    print('* Parsing Grammar:',)
     mma = cfgtopda.yyparse(argv[1])
-    print 'OK'
-    print ' - Total PDA states are ' + repr(len(mma.s))
+    print('OK')
+    print(' - Total PDA states are ' + repr(len(mma.s)))
 
-    print '* Simplify State IDs:',
+    print('* Simplify State IDs:',)
     simple_a = SimplifyStateIDs()
     mma.s, biggestid, newaccepted = simple_a.get(mma.s)
     if newaccepted:
-        print 'OK'
+        print('OK')
     else:
-        print 'OK'
+        print('OK')
 
-    print '* Eliminate READ states:',
+    print('* Eliminate READ states:',)
     replace = ReadReplace(mma.s, biggestid)
     mma.s = replace.replace_read()
-    print 'OK'
-    print ' - Total PDA states now are ' + repr(len(mma.s))
+    print('OK')
+    print(' - Total PDA states now are ' + repr(len(mma.s)))
     maxstate = replace.nextstate() - 1
 
-    print '* Reduce PDA:',
+    print('* Reduce PDA:',)
     simple_b = ReducePDA()
     mma.s = simple_b.get(mma.s)
-    print 'OK'
-    print ' - Total PDA states now are ' + repr(len(mma.s))
+    print('OK')
+    print(' - Total PDA states now are ' + repr(len(mma.s)))
 
-    print '* PDA to CFG transformation:',
+    print('* PDA to CFG transformation:',)
     cnfgenerator = PdaCnf(mma.s)
     grammar = cnfgenerator.get_rules(optimized)
-    print 'OK'
-    print ' - Total CFG rules generated: ' + repr(len(grammar))
+    print('OK')
+    print(' - Total CFG rules generated: ' + repr(len(grammar)))
 
     if mode == 'STR':
         gen = CFGGenerator(CNFGenerator(grammar),
                            optimized=optimized,
                            splitstring=splitstring,
                            maxstate=maxstate)
-        print gen.generate()
+        print(gen.generate())
     else:
-        print grammar
+        print(grammar)
 
 
     # For example, for given cfg:

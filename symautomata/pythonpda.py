@@ -13,22 +13,22 @@ class PDAState(object):
 
     def printer(self):
         """Prints PDA state attributes"""
-        print " ID " + repr(self.id) + " TYPE: " + repr(self.type)
+        print(" ID " + repr(self.id) + " TYPE: " + repr(self.type))
         if self.type == 0:
-            print " Tag: - "
-            print " Start State - "
+            print(" Tag: - ")
+            print(" Start State - ")
         elif self.type == 1:
-            print " Push " + repr(self.sym)
+            print(" Push " + repr(self.sym))
         elif self.type == 2:
-            print " Pop State " + repr(self.sym)
+            print(" Pop State " + repr(self.sym))
         elif self.type == 3:
-            print " Read State " + repr(self.sym)
+            print(" Read State " + repr(self.sym))
         elif self.type == 4:
-            print " Stop State " + repr(self.sym)
+            print(" Stop State " + repr(self.sym))
         for j in self.trans:
             if len(self.trans[j]) > 1 or (len(self.trans[j]) == 1):
                 for symbol in self.trans[j]:
-                    print " On Symbol " + repr(symbol) + " Transition To State " + repr(j)
+                    print(" On Symbol " + repr(symbol) + " Transition To State " + repr(j))
 
     def __init__(self):
         """State Initialization"""
@@ -97,7 +97,7 @@ class PythonPDA(object):
         """Prints PDA states and their attributes"""
         i = 0
         while i < self.n + 1:
-            print "--------- State No --------" + repr(i)
+            print("--------- State No --------" + repr(i))
             self.s[i].printer()
             i = i + 1
 

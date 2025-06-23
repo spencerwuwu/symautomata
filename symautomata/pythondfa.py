@@ -273,10 +273,6 @@ class PythonDFA(object):
         #    reverse=True)[0]
         cur_state = _get_cur()
         while len(inp) > 0:
-            #print(cur_state.stateid, inp[0])
-            if inp[0] in self.skip_alphabets:
-                inp = inp[1:]
-                continue
             found = False
             if self.yy_accept[cur_state.stateid] > 0:
                 self.yy_last_accepting_state = cur_state
@@ -287,6 +283,11 @@ class PythonDFA(object):
                     found = True
                     break
             if not found:
+                #print(cur_state.stateid, inp[0])
+                if inp[0] in self.skip_alphabets:
+                    inp = inp[1:]
+                    continue
+                #print("No transition found")
                 return False
         if cur_state.stateid and self.yy_last_accepting_state is not None == 0:
             return self.yy_accept[self.yy_last_accepting_state.stateid] == 1

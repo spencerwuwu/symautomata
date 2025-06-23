@@ -2,8 +2,8 @@
 # !/usr/bin/python
 
 try:
-    print 'Checking for pythonpda module:',
-    print 'OK'
+    print('Checking for pythonpda module:',)
+    print('OK')
     from pythonpda import PythonPDA, PDAState
 
     class PDA(PythonPDA):
@@ -38,4 +38,4 @@ try:
         #    return 0xffff
 
 except ImportError:
-    print 'FAIL'
+    print('FAIL')

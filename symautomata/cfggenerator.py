@@ -27,16 +27,16 @@ class CNFGenerator(object):
                 if m.end() == len(rule):
                     return
                 else:
-                    rest = string.strip(rule[m.end():])
+                    rest = rule[m.end():].strip()
                     if rest == "[]":
                         right_hand_side = []
                     else:
-                        combined_rulesets = string.split(rest, "|")
+                        combined_rulesets = rest.split("|")
                         right_hand_side = []
                         for i in combined_rulesets:
-                            l = string.split(i)
+                            l = i.split()
                             if len(l) > 1:
-                                l = tuple(string.split(i))
+                                l = tuple(i.split())
                             else:
                                 l = l[0]
                             parsed_grammar.append((left_hand_side, l))
@@ -61,20 +61,20 @@ class CNFGenerator(object):
                 for rule_symbol in rule[1]:
                     if rule_symbol not in self.grammar_nonterminals:
                         self.grammar_terminals.add(rule_symbol)
-        for rule_index in xrange(len(self.grammar_rules)):
+        for rule_index in range(len(self.grammar_rules)):
             if self.grammar_rules[rule_index][0] not in self.grammar_nonterminals_map:
                 self.grammar_nonterminals_map[self.grammar_rules[rule_index][0]] = {rule_index}
             else:
                 self.grammar_nonterminals_map[self.grammar_rules[rule_index][0]].add(rule_index)
         """Create a reverse map from symbols to rules for both terminals and nonterminals"""
         for a in self.grammar_terminals:
-            for rule_index in xrange(len(self.grammar_rules)):
+            for rule_index in range(len(self.grammar_rules)):
                 if self.grammar_rules[rule_index][1] == a:
                     if a not in self.grammar_terminals_map:
                         self.grammar_terminals_map[a] = {rule_index}
                     else:
                         self.grammar_terminals_map[a].add(rule_index)
-        for rule_index in xrange(len(self.grammar_rules)):
+        for rule_index in range(len(self.grammar_rules)):
             if self.grammar_rules[rule_index][0] not in self.grammar_nonterminals_map:
                 self.grammar_nonterminals_map[self.grammar_rules[rule_index][0]] = {rule_index}
             else:
@@ -104,7 +104,7 @@ class CNFGenerator(object):
         for u in self.unitary:
             self.grammar_rules.remove(u)
         for a in self.grammar_terminals:
-            for rule_index in xrange(len(self.grammar_rules)):
+            for rule_index in range(len(self.grammar_rules)):
                 if not isinstance(self.grammar_rules[rule_index][1], six.string_types) and len(
                         self.grammar_rules[rule_index][1]) >= 2 and a in self.grammar_rules[rule_index][1]:
                     if a not in self.new_grammar_nonterminals:
@@ -112,12 +112,12 @@ class CNFGenerator(object):
                         self.grammar_nonterminals.add(self.new_grammar_nonterminals[a])
                         self.grammar_rules.append((self.new_grammar_nonterminals[a], a))
                     symbolslist = list(self.grammar_rules[rule_index][1])
-                    for symbol_index in xrange(len(symbolslist)):
+                    for symbol_index in range(len(symbolslist)):
                         if symbolslist[symbol_index] == a:
                             symbolslist[symbol_index] = self.new_grammar_nonterminals[a]
                     self.grammar_rules[rule_index] = (self.grammar_rules[rule_index][0], tuple(symbolslist))
         total_rules = len(self.grammar_rules)
-        for rule_index in xrange(total_rules):
+        for rule_index in range(total_rules):
             if not isinstance(self.grammar_rules[rule_index][1], six.string_types) and len(self.grammar_rules[rule_index][1]) > 2:
                 self.next_rule(self.grammar_rules[rule_index][0], self.grammar_rules[rule_index][1], rule_index)
 

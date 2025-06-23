@@ -11,6 +11,7 @@ import networkx as nx
 from operator import attrgetter
 from subprocess import call
 from sys import argv
+import codecs
 
 from .alphabet import createalphabet
 
@@ -20,9 +21,10 @@ from .pythondfa import PythonDFA
 class DFA(PythonDFA):
     """The DFA class implemented using python"""
 
-    def __init__(self, alphabet = createalphabet()):
+    def __init__(self, alphabet = createalphabet(), skip_alphabets=[]):
         self.alphabet = alphabet
-        super(DFA, self).__init__(alphabet)
+        self.skip_alphabets = skip_alphabets
+        super(DFA, self).__init__(alphabet, skip_alphabets)
 
     def copy(self):
         mma = DFA(self.alphabet)
@@ -87,7 +89,7 @@ class Flexparser:
 
     outfile = ""
 
-    def __init__(self, alphabet=None):
+    def __init__(self, alphabet=None, skip_alphabets=[]):
         """
         Initialization function
         Args:
@@ -99,6 +101,7 @@ class Flexparser:
             self.alphabet = alphabet
         else:
             self.alphabet = []
+        self.skip_alphabets = skip_alphabets
 
     def _create_automaton_from_regex(self, myfile):
         """
@@ -394,7 +397,7 @@ class Flexparser:
             alphabet = self.alphabet
         else:
             alphabet = createalphabet()
-        mma = DFA(alphabet)
+        mma = DFA(alphabet, self.skip_alphabets)
         mma.yy_accept = accepted_states
         for state in states:
             if state != 0:
@@ -535,6 +538,9 @@ def simplify_digraph(G, mma):
             label = do_replace(label, "abcdef".upper(), "{a-f}".upper())
             label = do_replace(label, string.ascii_lowercase.replace("abcdef",""), "{!a-f}")
             label = do_replace(label, string.ascii_uppercase.replace("ABCDEF",""), "{!A-F}")
+
+            label = codecs.escape_encode(bytes(label, "latin1"))[0].decode()
+            label = codecs.escape_encode(bytes(label, "latin1"))[0].decode()
 
             eattr['label'] = label
     return G
