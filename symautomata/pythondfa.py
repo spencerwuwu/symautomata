@@ -255,6 +255,7 @@ class PythonDFA(object):
             self.add_arc(endstate, endstate, char)
 
     def consume_input(self, inp):
+        # NOTE: ME me me
         """
         Return True/False if the machine accepts/reject the input.
         Args:
@@ -283,11 +284,11 @@ class PythonDFA(object):
                     found = True
                     break
             if not found:
-                #print(cur_state.stateid, inp[0])
+                print(cur_state.stateid, inp[0])
                 if inp[0] in self.skip_alphabets:
                     inp = inp[1:]
                     continue
-                #print("No transition found")
+                print("No transition found")
                 return False
         if cur_state.stateid and self.yy_last_accepting_state is not None == 0:
             return self.yy_accept[self.yy_last_accepting_state.stateid] == 1

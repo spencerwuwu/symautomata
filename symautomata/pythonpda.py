@@ -102,6 +102,7 @@ class PythonPDA(object):
             i = i + 1
 
     def consume_input(self, mystr, stack=[], state=1, curchar=0, depth=0):
+        # NOTE: not me
         """
         Consumes an input and validates if it is accepted
         Args:

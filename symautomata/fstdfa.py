@@ -134,6 +134,7 @@ class FstDFA(fst.StdAcceptor):
                 self[state.stateid].initial = True
 
     def consume_input(self, inp):
+        # NOTE: not me either
         """
         Return True/False if the machine accepts/reject the input.
         Args:
