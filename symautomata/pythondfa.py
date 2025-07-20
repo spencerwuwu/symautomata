@@ -483,7 +483,7 @@ class PythonDFA(object):
 
     def _epsilon_closure(self, state):
         """
-        Returns the \epsilon-closure for the state given as input.
+        Returns the epsilon-closure for the state given as input.
         """
         closure = set([state.stateid])
         stack = [state]

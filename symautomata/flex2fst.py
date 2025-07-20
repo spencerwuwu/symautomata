@@ -377,6 +377,7 @@ class Flexparser:
         return total_states + 1, delta
 
     def yyparse(self, lexfile):
+        # NOTE: me me me
         """
         Args:
             lexfile (str): Flex file to be parsed

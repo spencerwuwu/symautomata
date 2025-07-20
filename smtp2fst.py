@@ -7,12 +7,12 @@ from symautomata.flex2fst import Flexparser, mma_2_digraph
 
 # https://en.wikipedia.org/wiki/List_of_Unicode_characters
 def get_common_unicode():
-    #basic_latin = list(range(0x22, 0x7E+1))
-    #return [chr(a) for a in basic_latin]
-    return  list(string.ascii_letters) + \
-            list(string.digits) + \
-            list(":/@#?=+-_.%&<>\"") + \
-            list("\r\n \t")
+    basic_latin = list(range(0x00, 0x7E+1))
+    return [chr(a) for a in basic_latin]
+    #return  list(string.ascii_letters) + \
+    #        list(string.digits) + \
+    #        list(":/@#?=+-_.%&<>\"") + \
+    #        list("\r\n \t")
 
     #return basic_latin + new_lines
 
